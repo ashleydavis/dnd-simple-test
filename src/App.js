@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState, createContext, useContext } from 'react';
+import { useEffect, useState, createContext, useContext, useRef, useCallback } from 'react';
 
 const DragContext = createContext(null);
 
@@ -8,32 +8,63 @@ export function DragContextProvider({ children }) {
 
     const [draggingItem, setDraggingItem] = useState(undefined);
     const [mousePos, setMousePos] = useState(undefined);
-
-    function onMouseMove(event) {
-        setMousePos({ x: event.clientX, y: event.clientY });
-
-        if (draggingItem) {
-            console.log('draggingItem');
-
-            //todo: are we over something?
-        }
-    };
+    const droppableRefs = useRef({}); 
 
     useEffect(() => {
-        //
-        // Handles mouse move on the window.
-        //
+        if (!draggingItem) {
+            return;
+        }
+
+        function onMouseMove(event) {
+            setMousePos({ x: event.clientX, y: event.clientY });
+    
+            if (draggingItem) {
+                if (droppableRefs.current) {
+                    for (const [id, droppable] of Object.entries(droppableRefs.current)) {
+                        const droppableRect = droppable.getBoundingClientRect();
+
+                        // If the mouse position is whtin the droppable area.
+                        if (event.clientX >= droppableRect.left && event.clientX <= droppableRect.right &&
+                            event.clientY >= droppableRect.top && event.clientY <= droppableRect.bottom) {
+                            console.log('hit droppable:');
+                            console.log(id);
+                        }
+                    }
+                }
+            }
+        }
+        
+        function onMouseUp(event) {
+            setDraggingItem(undefined);
+
+            //todo: trigger drop event.
+        }
+
         document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
 
         return () => {
             document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
         };
 
-    }, []);
+    }, [draggingItem]);
+
+    function setDroppableRef(id, ref) {
+        // console.log('setDroppableRef'); 
+        // console.log(id);
+        // console.log(ref);
+
+        droppableRefs.current = {
+            ...droppableRefs.current,
+            [id]: ref,
+        };
+    }
 
     const value = {
         draggingItem, 
         setDraggingItem,
+        setDroppableRef,
         mousePos,
         setMousePos,
     };
@@ -53,10 +84,11 @@ function useDraggable() {
 
 function Item({ item }) {
 
-    const { setDraggingItem } = useDraggable();
+    const { setDraggingItem, setDroppableRef } = useDraggable();
 
     return (
         <div
+            ref={el => setDroppableRef(item.id, el)}
             className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-48"
             onMouseDown={e => {
                 console.log('onMouseDown');
