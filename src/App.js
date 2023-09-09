@@ -86,7 +86,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         setMousePos({ x: event.clientX, y: event.clientY });
         setDraggingItem({ id, el, data });
         onDragStart({
-            data,
+            active: { id, el, data },
         });
     }
 
