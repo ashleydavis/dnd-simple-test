@@ -23,7 +23,9 @@ export function DragContextProvider({ children }) {
                     for (const [id, droppable] of Object.entries(droppableRefs.current)) {
                         const droppableRect = droppable.getBoundingClientRect();
 
-                        // If the mouse position is whtin the droppable area.
+                        //TODO: closest corner would be better.
+
+                        // If the mouse position is within the droppable area.
                         if (event.clientX >= droppableRect.left && event.clientX <= droppableRect.right &&
                             event.clientY >= droppableRect.top && event.clientY <= droppableRect.bottom) {
                             console.log('hit droppable:');
@@ -103,9 +105,27 @@ function Item({ item }) {
     );
 }
 
+function DragOverlay() {
+    const { draggingItem, mousePos } = useDraggable();
+
+    return draggingItem 
+        && <div
+            className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-48"
+            style={{
+                position: 'absolute',
+                top: mousePos?.y,
+                left: mousePos?.x,
+                right: mousePos?.x + 10,
+                bottom: mousePos?.y + 10,
+            }}
+            >
+            {draggingItem.name}
+        </div>
+        || undefined;
+}
+
 function App() {
 
-    const { draggingItem, mousePos } = useDraggable();
 
     const items1 = [
         { id: 1, name: 'item 1' },
@@ -114,36 +134,25 @@ function App() {
         { id: 2, name: 'item 2' },
     ];
     return (
-        <div
-            className="flex flex-row w-full h-screen relative"
-            >
-            <div className="flex flex-col flex-grow bg-green-200 h-full">
-                {items1.map(item => (
-                    <Item key={item.id} item={item} />
-                ))}
-            </div>
-
-            <div className="flex flex-col flex-grow bg-blue-200 h-full">
-                {items2.map(item => (
-                    <Item key={item.id} item={item} />
-                ))}
-            </div>
-
-            {draggingItem &&
-                <div
-                    className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-48"
-                    style={{
-                        position: 'absolute',
-                        top: mousePos?.y,
-                        left: mousePos?.x,
-                        right: mousePos?.x + 10,
-                        bottom: mousePos?.y + 10,
-                    }}
-                    >
-                    {draggingItem.name}
+        <DragContextProvider>
+            <div
+                className="flex flex-row w-full h-screen relative"
+                >
+                <div className="flex flex-col flex-grow bg-green-200 h-full">
+                    {items1.map(item => (
+                        <Item key={item.id} item={item} />
+                    ))}
                 </div>
-            }
-        </div>
+
+                <div className="flex flex-col flex-grow bg-blue-200 h-full">
+                    {items2.map(item => (
+                        <Item key={item.id} item={item} />
+                    ))}
+                </div>
+
+                <DragOverlay />
+            </div>
+        </DragContextProvider>
     );
 }
 
