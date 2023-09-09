@@ -6,7 +6,7 @@ const _DragContext = createContext(null);
 export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, children }) {
 
     const [draggingItem, setDraggingItem] = useState(undefined);
-    const [mousePos, setMousePos] = useState(undefined);
+    const [mousePos, setMousePos] = useState(undefined); //todo: updates to mouse pos probably should be debounced.
     const droppableRefs = useRef({}); 
 
     useEffect(() => {
@@ -182,10 +182,22 @@ function useDroppable({ id, data }) {
     };
 }
 
-function Item({ item }) {
+function Item({ item, index }) {
 
-    const { setNodeRef: setDraggableRef } = useDraggable({ id: item.id, data: item });
-    const { setNodeRef: setDroppableRef } = useDroppable({ id: item.id, data: item });
+    const { setNodeRef: setDraggableRef } = useDraggable({ 
+        id: item.id, 
+        data: {
+            index,
+            item,
+        },
+    });
+    const { setNodeRef: setDroppableRef } = useDroppable({ 
+        id: item.id, 
+        data: {
+            index,
+            item,
+        },
+    });
 
     return (
         <div
@@ -220,13 +232,11 @@ function DragOverlay() {
 }
 
 function App() {
-    const [items1, setItems1] = useState([
+    const [items, setItems] = useState([
         { id: 1, name: 'item 1' },
-    ]);
-    const [items2, setItems2] = useState([
         { id: 2, name: 'item 2' },
     ]);
-    
+
     return (
         <DragContext
             onDragStart={event => {
@@ -234,12 +244,14 @@ function App() {
                 console.log(event);
             }}
             onDragOver={event => {
-                console.log(`Drag over`);
+                console.log(`Drag over`); //todo: Don't forget that I need to know which half of the droppable the mouse is over.
                 console.log(event);
             }}
             onDragEnd={event => {
                 console.log(`Drag ended`);
                 console.log(event);
+
+                
             }}
             onDragCancel={event => {
                 console.log(`Drag cancelled`);
@@ -250,17 +262,14 @@ function App() {
                 className="flex flex-row w-full h-screen relative"
                 >
                 <div className="flex flex-col flex-grow bg-green-200 h-full">
-                    {items1.map(item => (
-                        <Item key={item.id} item={item} />
+                    {items.map((item, index) => (
+                        <Item 
+                            key={item.id} 
+                            item={item} 
+                            index={index}
+                            />
                     ))}
                 </div>
-
-                <div className="flex flex-col flex-grow bg-blue-200 h-full">
-                    {items2.map(item => (
-                        <Item key={item.id} item={item} />
-                    ))}
-                </div>
-
                 <DragOverlay />
             </div>
         </DragContext>
