@@ -33,6 +33,8 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         }
         
         function onMouseUp(event) {
+            setMousePos({ x: event.clientX, y: event.clientY });
+
             const draggedItem = draggingItem;
             const droppable = determineDragOver(event);
 
@@ -82,7 +84,8 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         return undefined;
     }
 
-    function initiateDragging(data) {
+    function initiateDragging(event, data) {
+        setMousePos({ x: event.clientX, y: event.clientY });
         setDraggingItem(data);
         onDragStart({
             data,
@@ -130,7 +133,7 @@ function useDraggable({ id, data }) {
     useEffect(() => {
         function onMouseDown(event) {
             //tdoo: only initiate dragging when moved a certain distance.
-            initiateDragging(data); //todo: when do we clone the data?
+            initiateDragging(event, data); //todo: when do we clone the data?
         }
 
         if (nodeRef.current) {
