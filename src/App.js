@@ -70,6 +70,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
                 const droppableRect = droppable.el.getBoundingClientRect();
 
                 //TODO: closest corner would be better.
+                //todo: could delegate this to the client.
                 // If the mouse position is within the droppable area.
                 if (mouseEvent.clientX >= droppableRect.left && mouseEvent.clientX <= droppableRect.right &&
                     mouseEvent.clientY >= droppableRect.top && mouseEvent.clientY <= droppableRect.bottom) {
@@ -172,7 +173,7 @@ function useDroppable({ id, data }) {
                 unregisterDroppable(id);
             }
         };
-    }, []);
+    }, [id, data]);
 
     function setNodeRef(el) {
         nodeRef.current = el;
