@@ -217,12 +217,13 @@ function DragOverlay() {
 }
 
 function App() {
-    const items1 = [ //todo: these need to be state.
+    const [items1, setItems1] = useState([
         { id: 1, name: 'item 1' },
-    ];
-    const items2 = [
+    ]);
+    const [items2, setItems2] = useState([
         { id: 2, name: 'item 2' },
-    ];
+    ]);
+    
     return (
         <DragContext
             onDragStart={event => {
