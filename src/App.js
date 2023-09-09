@@ -1,9 +1,9 @@
 import './App.css';
 import { useEffect, useState, createContext, useContext, useRef } from 'react';
 
-const DragContext = createContext(null);
+const _DragContext = createContext(null);
 
-export function DragContextProvider({ onDragStart, onDragOver, onDragEnd, onDragCancel, children }) { //todo: rename me
+export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, children }) {
 
     const [draggingItem, setDraggingItem] = useState(undefined);
     const [mousePos, setMousePos] = useState(undefined);
@@ -110,16 +110,16 @@ export function DragContextProvider({ onDragStart, onDragOver, onDragEnd, onDrag
     };
 
     return (
-        <DragContext.Provider
+        <_DragContext.Provider
             value={value}
             >
             {children}
-        </DragContext.Provider>
+        </_DragContext.Provider>
     );
 }
 
 function useDragContext() {
-    return useContext(DragContext);
+    return useContext(_DragContext);
 }
 
 function useDraggable({ id, data }) {
@@ -224,7 +224,7 @@ function App() {
         { id: 2, name: 'item 2' },
     ];
     return (
-        <DragContextProvider
+        <DragContext
             onDragStart={event => {
                 console.log(`Drag started`);
                 console.log(event);
@@ -259,7 +259,7 @@ function App() {
 
                 <DragOverlay />
             </div>
-        </DragContextProvider>
+        </DragContext>
     );
 }
 
