@@ -30,6 +30,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
                     }
                 }
             }
+
+            event.stopPropagation();
+            event.preventDefault();
         }
         
         function onMouseUp(event) {
@@ -52,6 +55,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
                     active: draggedItem,
                 });
             }
+
+            event.stopPropagation();
+            event.preventDefault();
         }
 
         document.addEventListener('mousemove', onMouseMove);
@@ -134,6 +140,9 @@ function useDraggable({ id, data }) {
         function onMouseDown(event) {
             //tdoo: only initiate dragging when moved a certain distance.
             initiateDragging(event, data); //todo: when do we clone the data?
+
+            event.stopPropagation();
+            event.preventDefault();
         }
 
         if (nodeRef.current) {
