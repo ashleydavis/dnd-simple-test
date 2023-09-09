@@ -8,7 +8,6 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
     const [draggingItem, setDraggingItem] = useState(undefined);
     const [mousePos, setMousePos] = useState(undefined);
     const droppableRefs = useRef({}); 
-    const dragOverRef = useRef(undefined);
 
     useEffect(() => {
         if (!draggingItem) {
@@ -18,18 +17,11 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         function onMouseMove(event) {
             setMousePos({ x: event.clientX, y: event.clientY });
     
-            if (draggingItem) {
-                const droppable = determineDragOver(event);
-                if (droppable) {
-                    if (droppable.id !== dragOverRef.current?.id) {
-                        dragOverRef.current = droppable;
-                        onDragOver({
-                            active: draggingItem,
-                            over: droppable,
-                        });
-                    }
-                }
-            }
+            const droppable = determineDragOver(event);
+            onDragOver({ //todo: this should be debounced.
+                active: draggingItem,
+                over: droppable,
+            });
 
             event.stopPropagation();
             event.preventDefault();
@@ -42,7 +34,6 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             const droppable = determineDragOver(event);
 
             setDraggingItem(undefined);
-            dragOverRef.current = undefined;
 
             if (droppable) {
                 onDragEnd({
