@@ -66,14 +66,14 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
     //
     function determineDragOver(mouseEvent) {
         if (droppableRefs.current) {
-            for (const [id, droppable] of Object.entries(droppableRefs.current)) {
+            for (const droppable of Object.values(droppableRefs.current)) {
                 const droppableRect = droppable.el.getBoundingClientRect();
 
                 //TODO: closest corner would be better.
                 // If the mouse position is within the droppable area.
                 if (mouseEvent.clientX >= droppableRect.left && mouseEvent.clientX <= droppableRect.right &&
                     mouseEvent.clientY >= droppableRect.top && mouseEvent.clientY <= droppableRect.bottom) {
-                    return { id, el: droppable.el, data: droppable.data };
+                    return droppable;
                 }
             }
         }
@@ -90,10 +90,10 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         });
     }
 
-    function registerDroppable(id, el, data) {
+    function registerDroppable(id, el, data) { //todo: this function is being spammed while dragging and it shoudn't change until the drag is over.
         droppableRefs.current = {
             ...droppableRefs.current,
-            [id]: { el, data },
+            [id]: { id, el, data },
         };
     }
 
