@@ -147,7 +147,7 @@ function useDraggable({ id, data }) {
                 nodeRef.current.removeEventListener('mousedown', onMouseDown);
             }
         };
-    }, []);
+    }, [id, data]);
 
     function setNodeRef(el) {
         nodeRef.current = el;
