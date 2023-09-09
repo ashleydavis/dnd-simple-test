@@ -209,7 +209,7 @@ function Item({ item, index }) {
             }}
             className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-24"
             >
-            {item.name}
+            {item.name} ({index})
         </div>
     );
 }
