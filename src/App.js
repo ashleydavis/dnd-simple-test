@@ -15,6 +15,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             return;
         }
 
+        //
+        // Handles move movement once dragging has commenced.
+        //
         function onMouseMove(event) {
             setMousePos({ x: event.clientX, y: event.clientY });
     
@@ -28,6 +31,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             event.preventDefault();
         }
         
+        //
+        // Handles mouse up to conclude dragging.
+        //
         function onMouseUp(event) {
             setMousePos({ x: event.clientX, y: event.clientY });
 
@@ -81,6 +87,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         return undefined;
     }
 
+    //
+    // Activates dragging of an active item.
+    //
     function activateDragging(event, id, el, data) {
         //todo: need to compute the delta of the mouse cursor to the element cursor and use that to render the dragged item.
         setMousePos({ x: event.clientX, y: event.clientY });
@@ -92,6 +101,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         });
     }
 
+    //
+    // Registers a droppable element with the context.
+    //
     function registerDroppable(id, el, data) { //todo: this function is being spammed while dragging and it shoudn't change until the drag is over.
         droppableRefs.current = {
             ...droppableRefs.current,
@@ -99,6 +111,9 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         };
     }
 
+    //
+    // Unregisters a droppable element from the context.
+    //
     function unregisterDroppable(id) {
         delete droppableRefs.current[id];
     }
