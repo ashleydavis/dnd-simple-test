@@ -7,6 +7,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
 
     const [draggingItem, setDraggingItem] = useState(undefined);
     const [mousePos, setMousePos] = useState(undefined); //todo: updates to mouse pos probably should be debounced.
+    const [dragStartDelta, setDragStartDelta] = useState(undefined);
     const droppableRefs = useRef({}); 
 
     useEffect(() => {
@@ -85,6 +86,8 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
     function initiateDragging(event, id, el, data) {
         //todo: need to compute the delta of the mouse cursor to the element cursor and use that to render the dragged item.
         setMousePos({ x: event.clientX, y: event.clientY });
+        const elRect = el.getBoundingClientRect();
+        setDragStartDelta({ x: event.clientX - elRect.left, y: event.clientY - elRect.top });
         setDraggingItem({ id, el, data });
         onDragStart({
             active: { id, el, data },
@@ -108,7 +111,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         registerDroppable,
         unregisterDroppable,
         mousePos,
-        setMousePos,
+        dragStartDelta,
     };
 
     return (
@@ -215,16 +218,16 @@ function Item({ item, index }) {
 }
 
 function DragOverlay() {
-    const { draggingItem, mousePos } = useDragContext();
+    const { draggingItem, mousePos, dragStartDelta } = useDragContext();
 
     return draggingItem 
         && <div
             className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-24"
             style={{
                 position: 'absolute',
-                top: mousePos?.y,
-                left: mousePos?.x,
+                left: mousePos?.x - dragStartDelta.x,
                 right: mousePos?.x + 10,
+                top: mousePos?.y - dragStartDelta?.y,
                 bottom: mousePos?.y + 10,
             }}
             >
