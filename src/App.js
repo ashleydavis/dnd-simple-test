@@ -249,23 +249,55 @@ function DragOverlay() {
 
     //todo: can i render the insertion point here?
 
-    return active 
-        && <div
-            className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-24"
-            style={{
-                position: 'absolute',
-                left: mousePos?.x - dragStartDelta.x,
-                right: mousePos?.x + 10,
-                top: mousePos?.y - dragStartDelta?.y,
-                bottom: mousePos?.y + 10,
-            }}
-            >
-            {active.data.item.name}
-            {over &&
-                <div>Over {over.data.item.name}</div>
+    console.log(over);
+    console.log(over?.el.getBoundingClientRect());
+
+    let overRect;
+    let insertionPointStyle;
+    if (over) {
+        overRect = over?.el.getBoundingClientRect();
+
+        insertionPointStyle = {
+            position: 'absolute',
+            left: overRect.left,
+            width: overRect.right - overRect.left,
+            top: overRect.top,
+            height: overRect.bottom - overRect.top,
+            zIndex: 500,
+        };
+    }
+    
+    return (
+        <>
+            {active 
+                && <div
+                    className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-24 pointer-events-none"
+                    style={{
+                        position: 'absolute',
+                        left: mousePos?.x - dragStartDelta.x,
+                        right: mousePos?.x + 10,
+                        top: mousePos?.y - dragStartDelta?.y,
+                        bottom: mousePos?.y + 10,
+                        zIndex: 1000,
+                    }}
+                    >
+                    {active.data.item.name}
+                    {over &&
+                        <div>Over {over.data.item.name}</div>
+                    }
+                </div>
             }
-        </div>
-        || undefined;
+
+            {over &&
+                <div
+                    className="bg-blue-200 pointer-events-none text-center text-align-middle"
+                    style={insertionPointStyle}
+                    >
+                    {over.data.item.name}
+                </div>
+            }
+        </>
+    );
 }
 
 function App() {
