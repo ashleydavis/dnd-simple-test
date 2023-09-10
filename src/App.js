@@ -37,6 +37,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             onDragOver({ //todo: this should be debounced.
                 active,
                 over: nowOver,
+                mousePos: { x: event.clientX, y: event.clientY },
             });
 
             event.stopPropagation();
@@ -54,12 +55,14 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
                 onDragEnd({
                     active,
                     over,
+                    mousePos: { x: event.clientX, y: event.clientY },
                 });
             }
             else {
                 onDragCancel({
                     active,
                     over,
+                    mousePos: { x: event.clientX, y: event.clientY },
                 });
             }
 
@@ -88,6 +91,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
                 const droppableRect = droppable.el.getBoundingClientRect();
 
                 //TODO: closest corner would be better.
+                //todo: When there are nested elements the ones on top need to have priority.
                 //todo: could delegate this to the client.
                 // If the mouse position is within the droppable area.
                 if (mouseEvent.clientX >= droppableRect.left && mouseEvent.clientX <= droppableRect.right &&
@@ -111,6 +115,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         setActive({ id, el, data });
         onDragStart({
             active: { id, el, data },
+            mousePos: { x: event.clientX, y: event.clientY },
         });
     }
 
@@ -360,7 +365,7 @@ function DragOverlay() {
 }
 
 function App() {
-    const [items, setItems] = useState([
+    const [items, setItems] = useState([ //todo: some animations would be good to slot the items into place.
         { id: 1, name: 'item 1' },
         { id: 2, name: 'item 2' },
         { id: 3, name: 'item 3' },
@@ -380,20 +385,35 @@ function App() {
             onDragEnd={event => {
                 console.log(`Drag ended`);
                 console.log(event);
+                const { active, over } = event;
+                const overRect = over?.el.getBoundingClientRect();
 
-                if (event.active.data.index === event.over.data.index) {
+                const height = overRect.bottom - overRect.top;
+                const width = overRect.right - overRect.left;
+                const xMidPoint = overRect.left + width / 2;
+                const yMidPoint = overRect.top + height / 2;
+
+                //todo: if the list is horizontal then the insertion point should be the other way.
+
+                const sourceIndex = active.data.index;
+                let targetIndex = over.data.index;
+
+                if (event.mousePos.y >= yMidPoint) {
+                    // If we drag below the midpoint then we need to insert after the item.
+                    targetIndex += 1;
+                }
+
+                if (sourceIndex === targetIndex) {
                     // The item was dropped in the same position it was dragged from.
                     return;
                 }
 
                 setItems(items => {
-                    const { active, over } = event;
                     const newItems = [...items];
-                    const [ item ] = newItems.splice(active.data.index, 1); // Remove the item from original positoin.
-                    let newItemIndex = over.data.index;
-                    if (active.data.index < newItemIndex) {
+                    const [ item ] = newItems.splice(sourceIndex, 1); // Remove the item from original position.
+                    if (active.data.index < targetIndex) {
                         // The removed item is before the over item, so the index of the moved item is now one less.
-                        newItemIndex -= 1;
+                        targetIndex -= 1;
                     }
                     newItems.splice(over.data.index, 0, item); // Insert the item at new position.
                     return newItems;
