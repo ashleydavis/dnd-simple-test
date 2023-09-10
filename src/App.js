@@ -6,6 +6,7 @@ const _DragContext = createContext(null);
 export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, children }) {
 
     const [active, setActive] = useState(undefined);
+    const [over, setOver] = useState(undefined);
     const [mousePos, setMousePos] = useState(undefined); //todo: updates to mouse pos probably should be debounced.
     const [dragStartDelta, setDragStartDelta] = useState(undefined);
     const droppableRefs = useRef({}); 
@@ -22,6 +23,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             setMousePos({ x: event.clientX, y: event.clientY });
     
             const over = determineDragOver(event);
+            setOver(over);
             onDragOver({ //todo: this should be debounced.
                 active,
                 over,
@@ -52,6 +54,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             }
 
             setActive(undefined);
+            setOver(undefined);
             event.stopPropagation();
             event.preventDefault();
         }
@@ -120,6 +123,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
 
     const value = {
         active, 
+        over,
         activateDragging,
         registerDroppable,
         unregisterDroppable,
@@ -231,7 +235,7 @@ function Item({ item, index }) {
 }
 
 function DragOverlay() {
-    const { active, mousePos, dragStartDelta } = useDragContext();
+    const { active, over, mousePos, dragStartDelta } = useDragContext();
 
     //todo: can i render the insertion point here?
 
@@ -247,6 +251,9 @@ function DragOverlay() {
             }}
             >
             {active.data.item.name}
+            {over &&
+                <div>Over {over.data.item.name}</div>
+            }
         </div>
         || undefined;
 }
