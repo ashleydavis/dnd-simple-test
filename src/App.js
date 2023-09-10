@@ -5,23 +5,23 @@ const _DragContext = createContext(null);
 
 export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, children }) {
 
-    const [draggingItem, setDraggingItem] = useState(undefined);
+    const [active, setActive] = useState(undefined);
     const [mousePos, setMousePos] = useState(undefined); //todo: updates to mouse pos probably should be debounced.
     const [dragStartDelta, setDragStartDelta] = useState(undefined);
     const droppableRefs = useRef({}); 
 
     useEffect(() => {
-        if (!draggingItem) {
+        if (!active) {
             return;
         }
 
         function onMouseMove(event) {
             setMousePos({ x: event.clientX, y: event.clientY });
     
-            const droppable = determineDragOver(event);
+            const over = determineDragOver(event);
             onDragOver({ //todo: this should be debounced.
-                active: draggingItem,
-                over: droppable,
+                active,
+                over,
             });
 
             event.stopPropagation();
@@ -31,23 +31,21 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         function onMouseUp(event) {
             setMousePos({ x: event.clientX, y: event.clientY });
 
-            const draggedItem = draggingItem;
-            const droppable = determineDragOver(event);
-
-            setDraggingItem(undefined);
-
-            if (droppable) {
+            const over = determineDragOver(event);
+            if (over) {
                 onDragEnd({
-                    active: draggedItem,
-                    over: droppable,
+                    active,
+                    over,
                 });
             }
             else {
                 onDragCancel({
-                    active: draggedItem,
+                    active,
+                    over,
                 });
             }
 
+            setActive(undefined);
             event.stopPropagation();
             event.preventDefault();
         }
@@ -60,7 +58,7 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
             document.removeEventListener('mouseup', onMouseUp);
         };
 
-    }, [draggingItem]);
+    }, [active]);
 
     //
     // Determine which droppable the mouse is over.
@@ -83,12 +81,12 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         return undefined;
     }
 
-    function initiateDragging(event, id, el, data) {
+    function activateDragging(event, id, el, data) {
         //todo: need to compute the delta of the mouse cursor to the element cursor and use that to render the dragged item.
         setMousePos({ x: event.clientX, y: event.clientY });
         const elRect = el.getBoundingClientRect();
         setDragStartDelta({ x: event.clientX - elRect.left, y: event.clientY - elRect.top });
-        setDraggingItem({ id, el, data });
+        setActive({ id, el, data });
         onDragStart({
             active: { id, el, data },
         });
@@ -106,8 +104,8 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
     }
 
     const value = {
-        draggingItem, 
-        initiateDragging,
+        active, 
+        activateDragging,
         registerDroppable,
         unregisterDroppable,
         mousePos,
@@ -129,13 +127,13 @@ function useDragContext() {
 
 function useDraggable({ id, data }) {
 
-    const { initiateDragging } = useDragContext();
+    const { activateDragging } = useDragContext();
     const nodeRef = useRef(undefined);
 
     useEffect(() => {
         function onMouseDown(event) {
             //tdoo: only initiate dragging when moved a certain distance.
-            initiateDragging(event, id, nodeRef.current, data); //todo: when do we clone the data?
+            activateDragging(event, id, nodeRef.current, data); //todo: when do we clone the data? Can the id be changed?
 
             event.stopPropagation();
             event.preventDefault();
@@ -218,9 +216,11 @@ function Item({ item, index }) {
 }
 
 function DragOverlay() {
-    const { draggingItem, mousePos, dragStartDelta } = useDragContext();
+    const { active, mousePos, dragStartDelta } = useDragContext();
 
-    return draggingItem 
+    //todo: can i render the insertion point here?
+
+    return active 
         && <div
             className="m-1 p-1 border-2 border-solid border-gray-600 bg-white w-48 h-24"
             style={{
@@ -231,7 +231,7 @@ function DragOverlay() {
                 bottom: mousePos?.y + 10,
             }}
             >
-            {draggingItem.name}
+            {active.data.item.name}
         </div>
         || undefined;
 }
