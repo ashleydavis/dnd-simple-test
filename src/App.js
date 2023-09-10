@@ -244,27 +244,75 @@ function Item({ item, index }) {
     );
 }
 
+
+function CirclePlusIcon({ color }) {
+    return (
+        <svg height="24" width="24">
+            <circle
+                cx="12"
+                cy="12"
+                r="10"
+                style={{ fill: color }}
+            />
+            <line
+                x1="12"
+                y1="7"
+                x2="12"
+                y2="17"
+                style={{ stroke: "white", strokeWidth: 2 }}
+            />
+            <line
+                x1="7"
+                y1="12"
+                x2="17"
+                y2="12"
+                style={{ stroke: "white", strokeWidth: 2 }}
+            />
+        </svg>
+    );
+}
+
 function DragOverlay() {
     const { active, over, mousePos, dragStartDelta } = useDragContext();
 
-    //todo: can i render the insertion point here?
-
-    console.log(over);
-    console.log(over?.el.getBoundingClientRect());
-
     let overRect;
     let insertionPointStyle;
+    let xMidPoint;
+    let yMidPoint;
     if (over) {
         overRect = over?.el.getBoundingClientRect();
 
-        insertionPointStyle = {
-            position: 'absolute',
-            left: overRect.left,
-            width: overRect.right - overRect.left,
-            top: overRect.top,
-            height: overRect.bottom - overRect.top,
-            zIndex: 500,
-        };
+        let height = overRect.bottom - overRect.top;
+        let width = overRect.right - overRect.left;
+        xMidPoint = overRect.left + width / 2;
+        yMidPoint = overRect.top + height / 2;
+
+        //todo: if the list is horizontal then the insertion point should be the other way.
+
+        if (mousePos.y < yMidPoint) {
+            // Insertion at top.
+            insertionPointStyle = {
+                position: 'absolute',
+                left: overRect.left,
+                width, 
+                top: overRect.top - 2,
+                height: 4,
+                zIndex: 500,
+                backgroundColor: 'blue',
+            };
+        }
+        else {
+            // Insertion at bottom.
+            insertionPointStyle = {
+                position: 'absolute',
+                left: overRect.left,
+                width, 
+                top: overRect.bottom,
+                height: 4,
+                zIndex: 500,
+                backgroundColor: 'blue',
+            };
+        }
     }
     
     return (
@@ -290,10 +338,21 @@ function DragOverlay() {
 
             {over &&
                 <div
-                    className="bg-blue-200 pointer-events-none text-center text-align-middle"
+                    className="pointer-events-none"
                     style={insertionPointStyle}
                     >
-                    {over.data.item.name}
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: xMidPoint - 12,
+                            width: 24,
+                            top: -10,
+                            height: 24,
+                            zIndex: 1100,
+                        }}
+                        >
+                        <CirclePlusIcon color="blue" />
+                    </div>
                 </div>
             }
         </>
