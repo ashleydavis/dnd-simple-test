@@ -22,11 +22,21 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
         function onMouseMove(event) {
             setMousePos({ x: event.clientX, y: event.clientY });
     
-            const over = determineDragOver(event);
-            setOver(over);
+            const nowOver = determineDragOver(event);
+            if (nowOver !== undefined) {
+                if (nowOver.id !== over?.id) {
+                    setOver(nowOver);
+                }
+            }
+            else {
+                if (over !== undefined) {
+                    setOver(undefined);
+                }
+            }
+
             onDragOver({ //todo: this should be debounced.
                 active,
-                over,
+                over: nowOver,
             });
 
             event.stopPropagation();
@@ -269,7 +279,8 @@ function App() {
         <DragContext
             onDragStart={event => {
                 console.log(`Drag started`);
-                console.log(event);
+                console.log(event.active);
+                console.log(`Source: ${event.active.data.index}`);
             }}
             onDragOver={event => {
                 // console.log(`Drag over`); //todo: Don't forget that I need to know which half of the droppable the mouse is over.
