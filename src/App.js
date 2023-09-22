@@ -108,7 +108,6 @@ export function DragContext({ onDragStart, onDragOver, onDragEnd, onDragCancel, 
     // Activates dragging of an active item.
     //
     function activateDragging(event, id, el, data) {
-        //todo: need to compute the delta of the mouse cursor to the element cursor and use that to render the dragged item.
         setMousePos({ x: event.clientX, y: event.clientY });
         const elRect = el.getBoundingClientRect();
         setDragStartDelta({ x: event.clientX - elRect.left, y: event.clientY - elRect.top });
@@ -166,7 +165,7 @@ function useDraggable({ id, data }) {
 
     useEffect(() => {
         function onMouseDown(event) {
-            //tdoo: only initiate dragging when moved a certain distance.
+            //todo: only initiate dragging when moved a certain distance.
             activateDragging(event, id, nodeRef.current, data); //todo: when do we clone the data? Can the id be changed?
 
             event.stopPropagation();
@@ -248,7 +247,6 @@ function Item({ item, index }) {
         </div>
     );
 }
-
 
 function CirclePlusIcon({ color }) {
     return (
@@ -436,6 +434,7 @@ function App() {
                             />
                     ))}
                 </div>
+                
                 <DragOverlay />
             </div>
         </DragContext>
